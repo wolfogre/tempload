@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/wolfogre/tempload/internal/pkg/bashupload"
 
@@ -15,13 +16,18 @@ func main() {
 		fmt.Println(os.Args[0], "filename")
 		return
 	}
-	filename := os.Args[1]
-	content, err := ioutil.ReadFile(filename)
+	for _, v := range os.Args[1:] {
+		upload(v)
+	}
+}
+
+func upload(name string) {
+	content, err := ioutil.ReadFile(name)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	progress := bashupload.NewClient().Upload(filename, content)
+	progress := bashupload.NewClient().Upload(filepath.Base(name), content)
 	bar := pb.Full.Start(len(content))
 	for p := range progress {
 		if p.Done {
